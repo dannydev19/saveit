@@ -1,11 +1,3 @@
-from models.model import Base
-from models.expense import Expense
-from models.fixed_expense import FixedExpense
-from models.monthly_fixed_expense import MonthlyFixedExpense
-from db.db import engine
-
-Base.metadata.create_all(engine)
-
 import pandas as pd
 import streamlit as st
 
@@ -42,10 +34,8 @@ data = {
 }
 
 chart_data = pd.DataFrame(data)
-print(f"{chart_data=}")
 
 chart_data.set_index("Month", inplace=True)
-print(f"{chart_data=}")
 
 st.title("Fixed vs Variable Expenses")
 st.bar_chart(chart_data)

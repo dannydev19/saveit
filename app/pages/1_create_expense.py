@@ -1,6 +1,6 @@
 import streamlit as st
 
-from controllers.expense import ExpenseController
+from dynamo.db import client
 from enums import FixedExpensesEnum, CategoryExpenseEnum
 
 st.title("Create expense")
@@ -18,5 +18,13 @@ with st.form("add_expense_form"):
 
 
 if submit_button:
-    ExpenseController.create_expense(price, description, when, category_expense)
+    client.put_item(
+        TableName="saveit",
+        Item={
+            "Id": {"S": "EXPENSE#2"},
+            "TimeScope": {"S": f"DATE#{when.strftime("%Y-%m-%d")}"},
+            "description": {"S": description},
+            "price": {"N": str(price)},
+        },
+    )
     st.success(f"Expense added successfully!")
