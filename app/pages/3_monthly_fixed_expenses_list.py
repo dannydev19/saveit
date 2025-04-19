@@ -43,7 +43,7 @@ response = client.scan(
         ":prefix": {"S": "MONTHLY_FIXED_EXPENSE#"},
         ":datePrefix": {"S": f"YEAR-MONTH#2025-{selected_month_number}"},
     },
-    ProjectionExpression="description, paid",
+    ProjectionExpression="description, paid, price",
 )
 
 items = []
@@ -56,6 +56,9 @@ for item in response["Items"]:
 
         if k == "paid":
             v_value = bool(v_value)
+
+        if k == "price":
+            v_value = float(v_value)
 
         _item[k] = v_value
 
