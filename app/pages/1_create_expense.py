@@ -1,4 +1,5 @@
 import streamlit as st
+from uuid import uuid4
 
 from dynamo.db import client
 from enums import FixedExpensesEnum, CategoryExpenseEnum
@@ -10,7 +11,6 @@ category_expenses = CategoryExpenseEnum.get_values()
 
 
 with st.form("add_expense_form"):
-    id = st.number_input("Id", value=1, step=1)
     price = st.number_input("Price", min_value=0.0, step=1.0)
     description = st.text_input("Description")
     when = st.date_input("Date", value="today")
@@ -22,7 +22,7 @@ if submit_button:
     client.put_item(
         TableName="saveit",
         Item={
-            "Id": {"S": f"EXPENSE#{id}"},
+            "Id": {"S": f"EXPENSE#{str(uuid4())}"},
             "TimeScope": {"S": f"DATE#{when.strftime("%Y-%m-%d")}"},
             "description": {"S": description},
             "price": {"N": str(price)},
