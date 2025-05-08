@@ -21,7 +21,6 @@ months = (
     "December 2025",
 )
 
-
 index = datetime.now().month - 1
 
 selected_month = st.selectbox("Select a month", months, index=index)
@@ -47,7 +46,7 @@ response = client.scan(
         ":prefix": {"S": "MONTHLY_FIXED_EXPENSE#"},
         ":datePrefix": {"S": f"YEAR-MONTH#2025-{selected_month_number}"},
     },
-    ProjectionExpression="description, paid, price",
+    ProjectionExpression="Id, TimeScope, description, paid, price",
 )
 
 items = []
@@ -71,4 +70,30 @@ for item in response["Items"]:
 
 df = pd.DataFrame(items)
 
-df
+column_config = {
+    "Id": st.column_config.TextColumn(width="small"),
+    "TimeScope": st.column_config.TextColumn(width="small"),
+    "description": st.column_config.TextColumn(width="large"),
+    "price": st.column_config.NumberColumn(width="medium"),
+    "paid": st.column_config.CheckboxColumn(),
+}
+
+edited_df = st.data_editor(df, column_config=column_config)
+
+if st.button("Submit changes"):
+
+    for row in edited_df.to_dict(orient="records"):
+
+        response = client.update_item(
+            TableName="saveit",
+            Key={"Id": {"S": row["Id"]}, "TimeScope": {"S": row["TimeScope"]}},
+            UpdateExpression="SET description = :desc, price = :price, paid = :paid",
+            ExpressionAttributeValues={
+                ":desc": {"S": row["description"]},
+                ":price": {"N": str(row["price"])},
+                ":paid": {"BOOL": row["paid"]},
+            },
+            ReturnValues="ALL_NEW",
+        )
+
+    st.success(f"Changes submitted!")
