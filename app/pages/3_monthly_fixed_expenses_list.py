@@ -70,10 +70,12 @@ for item in response["Items"]:
 
 df = pd.DataFrame(items)
 
+d = [(r["Id"], r["TimeScope"]) for r in df.to_dict(orient="records")]
+
+df.drop(["Id", "TimeScope"], axis=1, inplace=True)
+
 column_config = {
-    "Id": st.column_config.TextColumn(width="small"),
-    "TimeScope": st.column_config.TextColumn(width="small"),
-    "description": st.column_config.TextColumn(width="large"),
+    "description": st.column_config.TextColumn(width="medium"),
     "price": st.column_config.NumberColumn(width="medium"),
     "paid": st.column_config.CheckboxColumn(),
 }
@@ -82,11 +84,11 @@ edited_df = st.data_editor(df, column_config=column_config)
 
 if st.button("Submit changes"):
 
-    for row in edited_df.to_dict(orient="records"):
+    for idx, row in enumerate(edited_df.to_dict(orient="records")):
 
         response = client.update_item(
             TableName="saveit",
-            Key={"Id": {"S": row["Id"]}, "TimeScope": {"S": row["TimeScope"]}},
+            Key={"Id": {"S": d[idx][0]}, "TimeScope": {"S": d[idx][1]}},
             UpdateExpression="SET description = :desc, price = :price, paid = :paid",
             ExpressionAttributeValues={
                 ":desc": {"S": row["description"]},
