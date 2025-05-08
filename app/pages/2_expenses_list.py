@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
 
 from dynamo.db import client
 
@@ -22,7 +22,9 @@ months = (
     "December 2025",
 )
 
-selected_month = st.selectbox("Select a month", months, index=3)
+index = datetime.now().month - 1
+
+selected_month = st.selectbox("Select a month", months, index=index)
 
 month_mapping = {month: idx + 1 for idx, month in enumerate(months)}
 
