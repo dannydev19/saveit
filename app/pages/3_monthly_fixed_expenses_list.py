@@ -49,11 +49,16 @@ response = client.scan(
     ProjectionExpression="Id, TimeScope, description, paid, price",
 )
 
-items = []
+items, d = [], []
 
 for item in response["Items"]:
     _item = {}
+    d.append((item["Id"]["S"], item["TimeScope"]["S"]))
+
     for k, v in item.items():
+        if k in ("Id", "TimeScope"):
+            continue
+
         v_type = next(iter(v.keys()))
         v_value = next(iter(v.values()))
 
@@ -70,9 +75,6 @@ for item in response["Items"]:
 
 df = pd.DataFrame(items)
 
-d = [(r["Id"], r["TimeScope"]) for r in df.to_dict(orient="records")]
-
-df.drop(["Id", "TimeScope"], axis=1, inplace=True)
 
 column_config = {
     "description": st.column_config.TextColumn(width="medium"),
